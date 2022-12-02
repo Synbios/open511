@@ -1,0 +1,29 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <%= link_to "Assessment Question 1", root_path, class: "navbar-brand" %>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarScroll">
+      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Link</a>
+        </li>
+      </ul>
+      <div class="d-flex">
+        <% if current_user.nil? %>
+          <%= link_to "Sign In", new_user_session_path, class: "btn btn-secondary btn-sm ms-2 me-1" %>
+          <%= link_to "Sign Up", new_user_registration_path, class: "btn btn-success btn-sm ms-2 me-1" %>
+        <% else %>
+          <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "btn btn-danger btn-sm ms-2 me-1" %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>

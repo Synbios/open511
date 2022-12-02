@@ -1,7 +1,10 @@
 // Entry point for the build script in your package.json
 
 // load Bootstrap 5
-import "@hotwired/turbo-rails";
+// turbo link is disabled because it mess up with authentication links
+// import "@hotwired/turbo-rails";
+
+
 import "./controllers";
 import * as bootstrap from "bootstrap";
 
@@ -16,6 +19,10 @@ window.$.DataTable = dt;
 
 // load moment
 import moment from "moment";
+
+import Rails from '@rails/ujs';
+
+Rails.start();
 
 // constants
 const API_URI = "https://api.open511.gov.bc.ca";

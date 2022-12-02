@@ -1,0 +1,39 @@
+<div class="container d-flex justify-content-center">
+  <div class="auth card shadow-sm p-5">
+    <h4>Sign Up</h4>
+    <p>Register an new account to test saving events. You can use any email it will not be verified.</p>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+      <div class="mb-3">
+        <%= f.label :email, class: "form-label" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password, class: "form-label" %>
+        <% if @minimum_password_length %>
+        <em>(<%= @minimum_password_length %> characters minimum)</em>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password", class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :password_confirmation, class: "form-label" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-control" %>
+      </div>
+
+
+      <div class="actions d-flex justify-content-center mb-3">
+        <%= f.submit "Register", class: "btn btn-primary" %>
+      </div>
+      <p class="text-center m-0">
+        <%= link_to "I already have an account", new_session_path(resource_name) %>
+      </p>
+
+    <% end %>
+  </div>
+</div>
+
+<%#= render "devise/shared/links" %>
