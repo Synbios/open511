@@ -18,10 +18,10 @@
       </ul>
       <div class="d-flex">
         <% if current_user.nil? %>
-          <%= link_to "Sign In", new_user_session_path, class: "btn btn-secondary btn-sm ms-2 me-1" %>
-          <%= link_to "Sign Up", new_user_registration_path, class: "btn btn-success btn-sm ms-2 me-1" %>
+          <%= link_to "Sign In", sign_in_path, class: "btn btn-secondary btn-sm ms-2 me-1" %>
+          <%= link_to "Sign Up", sign_up_path, class: "btn btn-success btn-sm ms-2 me-1" %>
         <% else %>
-          <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "btn btn-danger btn-sm ms-2 me-1" %>
+          <%= link_to "Sign Out", sign_out_path, method: :delete, class: "btn btn-danger btn-sm ms-2 me-1" %>
         <% end %>
       </div>
     </div>

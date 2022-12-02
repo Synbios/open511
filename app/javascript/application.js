@@ -25,8 +25,10 @@ import Rails from '@rails/ujs';
 Rails.start();
 
 // constants
+const DEBUG = window.location.hostname === '0.0.0.0';
 const API_URI = "https://api.open511.gov.bc.ca";
 const EVENT_SEARCH_PATH = "/events";
+const AREA_PATH = "/areas";
 
 const NA = '<i class="text-muted">N/A</i>';
 
@@ -37,8 +39,8 @@ const NA = '<i class="text-muted">N/A</i>';
 const formatTime = (str) => {
   if(str != undefined){
     let times = str.split("/");
-    let from = moment(times[0]).format('YYYY-MM-DD HH:mm');
-    let to = times[1] != undefined && times[1].length > 0 ? moment(times[1]).format('YYYY-MM-DD HH:mm') : undefined;
+    let from = moment.utc(times[0]).local().format('YYYY-MM-DD HH:mm');
+    let to = times[1] != undefined && times[1].length > 0 ? moment.utc(times[1]).local().format('YYYY-MM-DD HH:mm') : undefined;
     if(to != undefined){
       return `${from} <i class="text-muted">to</i> ${to}`;
     }
@@ -128,11 +130,13 @@ const showEventDetails = (event) => {
         </tbody>
       </table>
       `);
-}
+};
+
+var eventsTable = undefined;
 
 $(document).ready(function () {
 
-  var eventsTable = $('#eventsTable').DataTable({
+  eventsTable = $('#eventsTable').DataTable({
     columns: [
       {
         className: 'dt-control',
@@ -176,24 +180,45 @@ $(document).ready(function () {
         orderable: false
       }
     ],
+    dom: "rt<'d-flex justify-content-between'lp>",
     ordering: false,
     processing: true,
     serverSide: true,
     ajax: function (data, callback, settings) {
-      console.log(data);
-      console.log(settings);
+      DEBUG && console.log("data:", data);
+      DEBUG && console.log("settings:", settings);
 
+      // pagination options
       let offset = data["start"] || 0;
       let limit = data["length"] || 10;
+
+      // dt options
       let draw = data["draw"];
+
+      // search options
       let url = `${API_URI}${EVENT_SEARCH_PATH}?limit=${limit}&offset=${offset}`;
-      console.log("loading from ", url);
+      if($("#areaFilter").val()){
+        url += `&area_id=${encodeURIComponent($("#areaFilter").val())}`;
+      }
+      if($("#eventTypeFilter").val()){
+        url += `&event_type=${encodeURIComponent($("#eventTypeFilter").val())}`;
+      }
+      if($("#severityFilter").val()){
+        url += `&severity=${encodeURIComponent($("#severityFilter").val())}`;
+      }
+      if($("#startDateFilter").val()){
+        url += `&in_effect_on=${$("#startDateFilter").val()}T00:00`;
+      }
+
+      DEBUG && console.log("Search URL = ", url);
       $.ajax({
         url: url,
         success: (data) => {
-          console.log("ajax call ok...", data["pagination"]);
+
           let events = data["events"];
-          console.log(">>>>>> return ", events.length , " records...");
+
+          DEBUG && console.log("Search returns ", events.length , " records...");
+          DEBUG && console.log("Pagination data:", data["pagination"]);
 
           let recordsFiltered = undefined;
           if(events.length < limit){
@@ -214,7 +239,7 @@ $(document).ready(function () {
               startDate: event["schedule"] != undefined && event["schedule"]["intervals"] != undefined ? event["schedule"]["intervals"].map((str)=>{
                 return formatTime(str);
               }).join("<br>") : NA,
-              actions: '<button type="button" class="btn btn-primary btn-xs">Save me</button>',
+              actions: '<button type="button" class="btn btn-primary btn-xs">Save</button>',
               // additional detail information for the nested table
               url: event["url"],
               jurisdictionUrl: event["jurisdiction_url"],
@@ -226,8 +251,8 @@ $(document).ready(function () {
               roads: event["roads"].map((road)=>{
                 return `${road["name"]} (from ${road["from"]} to ${road["to"]}) ${road["state"]} (${road["direction"]} direction), +delay: ${road["+delay"] ? road["+delay"] : NA}`;
               }).join(", "),
-              updated: moment(event["updated"]).format('on YYYY-MM-DD at HH:mm:ss'),
-              created: moment(event["created"]).format('on YYYY-MM-DD at HH:mm:ss'),
+              updated: moment.utc(event["updated"]).local().format('on YYYY-MM-DD at HH:mm:ss'),
+              created: moment.utc(event["created"]).local().format('on YYYY-MM-DD at HH:mm:ss'),
             };
           });
           callback({
@@ -238,10 +263,11 @@ $(document).ready(function () {
           });
         },
         error: (jqXHR, textStatus, errorThrown ) => {
-          console.log("ajax call failed...", textStatus);
+          DEBUG && console.log("ajax call failed...", textStatus);
         }
       });
     },
+    searching: false,
 
     language: {
       processing:     "Loading events...",
@@ -277,4 +303,44 @@ $(document).ready(function () {
       tr.addClass('shown');
     }
   });
+
+
+  // configure filter options
+  // load and configure areas
+  loadAreaOptions();
+  // configure event types
+  $("#eventTypeFilter").on("change", ()=>{
+    eventsTable && eventsTable.ajax.reload();
+  });
+  // configure severities
+  $("#severityFilter").on("change", ()=>{
+    eventsTable && eventsTable.ajax.reload();
+  });
+  // configure start date
+  $("#startDateFilter").on("change", ()=>{
+    eventsTable && eventsTable.ajax.reload();
+  });
 });
+
+const loadAreaOptions = () => {
+  $("#areaFilter .placeholder").text("Loading options...");
+  $.ajax({
+    url: `${API_URI}${AREA_PATH}`,
+    success: (data) => {
+      let areas = data["areas"].map((area)=>{
+        $("#areaFilter").append(
+          $('<option>', {value: area["id"], text: area["name"]})
+        );
+      });
+      $("#areaFilter .placeholder").text("Unselected");
+      $('#areaFilter').removeAttr('disabled');
+
+      $("#areaFilter").on("change", ()=>{
+        eventsTable && eventsTable.ajax.reload();
+      });
+    },
+    error: (jqXHR, textStatus, errorThrown ) => {
+      $("#areaFilter .placeholder").text("Failed to load options");
+    }
+  });
+};

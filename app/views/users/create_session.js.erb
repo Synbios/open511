@@ -1,0 +1,6 @@
+<% if @error.blank? %>
+$(".error-message").text("");
+window.location.href="/";
+<% else %>
+$(".error-message").text(`<%= @error %>`);
+<% end %>

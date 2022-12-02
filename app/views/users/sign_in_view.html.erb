@@ -3,7 +3,9 @@
     <h4>Sign In</h4>
     <p>Sign in an existing user to test saving events.</p>
 
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <p class="text-danger error-message"></p>
+
+    <%= form_for(User.new, url: create_session_users_path, remote: true) do |f| %>
       <div class="mb-3">
         <%= f.label :email, class: "form-label" %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control" %>
@@ -14,26 +16,23 @@
         <%= f.password_field :password, autocomplete: "current-password", class: "form-control" %>
       </div>
 
-      <% if devise_mapping.rememberable? %>
-        <div class="mb-4">
-          <div class="form-check">
-            <%= f.check_box :remember_me, class: "form-check-input" %>
-            <%= f.label :remember_me, class: "form-check-label" do %>
-              Remember me
-            <% end %>
-          </div>
+      <div class="mb-4">
+        <div class="form-check">
+          <%= f.check_box :remember_me, class: "form-check-input" %>
+          <%= f.label :remember_me, class: "form-check-label" do %>
+            Remember me
+          <% end %>
         </div>
-      <% end %>
+      </div>
 
       <div class="actions d-flex justify-content-center mb-3">
-        <%= f.submit "Log in", class: "btn btn-primary" %>
+        <%= f.submit "Sign in", class: "btn btn-primary" %>
       </div>
       <p class="text-center m-0">
-        <%= link_to "I don't have an account", new_registration_path(resource_name) %>
+        <%= link_to "I don't have an account", sign_up_path %>
+        <%= link_to "Back to home", root_path %>
       </p>
 
     <% end %>
   </div>
 </div>
-
-<%#= render "devise/shared/links" %>
