@@ -1,2 +1,28 @@
+// install boostrap css
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons';
+
+// install datatables css
+@import 'datatables.net-bs5/css/dataTables.bootstrap5';
+
+// web specific styles
+
+#eventsTable {
+  font-size: 12px;
+
+  .table-nested {
+    padding-left: 50px;
+    border-color: transparent;
+    margin: 0;
+    th {
+      width: 180px;
+    }
+  }
+}
+
+.btn-group-xs > .btn, .btn-xs {
+  padding  : .25rem .4rem;
+  font-size  : .55rem !important;
+  line-height  : .5;
+  border-radius : .2rem;
+}

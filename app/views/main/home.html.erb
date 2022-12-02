@@ -1,10 +1,22 @@
 <!-- inside app/views/home/index.html.erb -->
-<h1>Welcome, this is the home page</h1>
 
-<button type="button"
-        class="btn btn-lg btn-danger"
-        data-bs-toggle="popover"
-        title="Popover title"
-        data-bs-content="Amazing content, right ?">
-        Click to toggle popover
-</button>  
+
+<h4>View and search current events from open511.com </h4>
+
+<div class="card p-4 shadow-sm">
+  <table id="eventsTable" class="table table-striped table-hover table-bordered" style="width:100%">
+    <thead>
+      <tr>
+        <th></th>
+        <th>ID</th>
+        <th>Headline</th>
+        <th>Event Type</th>
+        <th>Areas</th>
+        <th>Severity</th>
+        <th>Start Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
