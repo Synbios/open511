@@ -1,0 +1,4 @@
+<% if @bookmark.present? %>
+$('a[data-id="btn_<%= @bookmark.event_id %>"]').replaceWith(`<a data-id="btn_<%= @bookmark.event_id %>" href="/bookmarks?event_id=<%= @bookmark.event_id %>" data-method="post" data-remote="true" class="btn btn-success btn-xs">Save</a>`);
+$('#bookmarkedEventsTable').DataTable().row('#<%= @bookmark.event_id %>').remove().draw(false);
+<% end %>

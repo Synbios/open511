@@ -6,5 +6,5 @@ class User < ApplicationRecord
          #:recoverable, # remove unwanted features
          #:validatable,
          :registerable
-
+  has_many :bookmarks, dependent: :destroy
 end

@@ -54,87 +54,111 @@ const formatTime = (str) => {
 };
 
 const showEventDetails = (event) => {
-    return (`
-      <table class="table table-borderless table-sm table-nested">
-        <tbody>
-          <tr>
-            <th>Official ID:</th>
-            <td>${event.id}</td>
-          </tr>
-          <tr>
-            <th>Data URL:</th>
-            <td>
-              <a href="${API_URI}${event.url}" target="_blank">${API_URI}${event.url} <i class="bi bi-hand-index-thumb"></i></a>
-            </td>
-          </tr>
-          <tr>
-            <th>Jurisdiction URL:</th>
-            <td>
-              <a href="${API_URI}${event.jurisdictionUrl}" target="_blank">${API_URI}${event.jurisdictionUrl} <i class="bi bi-hand-index-thumb"></i></a>
-            </td>
-          </tr>
-          <tr>
-            <th>Headline:</th>
-            <td>${event.headline ? event.headline : NA}</td>
-          </tr>
-          <tr>
-            <th>Status:</th>
-            <td>${event.status}</td>
-          </tr>
-          <tr>
-            <th>Severity:</th>
-            <td>${event.severity}</td>
-          </tr>
-          <tr>
-            <th>Description:</th>
-            <td>${event.description ? event.description : NA}</td>
-          </tr>
-          <tr>
-            <th>Plus IVR Message:</th>
-            <td>${event.ivr_message ? event.ivr_message : NA}</td>
-          </tr>
-          <tr>
-            <th>Schedules:</th>
-            <td>${event.startDate}</td>
-          </tr>
-          <tr>
-            <th>Event Type:</th>
-            <td>${event.eventType}</td>
-          </tr>
-          <tr>
-            <th>Event Subtypes:</th>
-            <td>${event.eventSubtypes ? event.eventSubtypes : NA}</td>
-          </tr>
+  return (`
+    <table class="table table-borderless table-sm table-nested">
+      <tbody>
+        <tr>
+          <th>Official ID:</th>
+          <td>${event.id}</td>
+        </tr>
+        <tr>
+          <th>Data URL:</th>
+          <td>
+            <a href="${API_URI}${event.url}" target="_blank">${API_URI}${event.url} <i class="bi bi-hand-index-thumb"></i></a>
+          </td>
+        </tr>
+        <tr>
+          <th>Jurisdiction URL:</th>
+          <td>
+            <a href="${API_URI}${event.jurisdictionUrl}" target="_blank">${API_URI}${event.jurisdictionUrl} <i class="bi bi-hand-index-thumb"></i></a>
+          </td>
+        </tr>
+        <tr>
+          <th>Headline:</th>
+          <td>${event.headline ? event.headline : NA}</td>
+        </tr>
+        <tr>
+          <th>Status:</th>
+          <td>${event.status}</td>
+        </tr>
+        <tr>
+          <th>Severity:</th>
+          <td>${event.severity}</td>
+        </tr>
+        <tr>
+          <th>Description:</th>
+          <td>${event.description ? event.description : NA}</td>
+        </tr>
+        <tr>
+          <th>Plus IVR Message:</th>
+          <td>${event.ivr_message ? event.ivr_message : NA}</td>
+        </tr>
+        <tr>
+          <th>Schedules:</th>
+          <td>${event.startDate}</td>
+        </tr>
+        <tr>
+          <th>Event Type:</th>
+          <td>${event.eventType}</td>
+        </tr>
+        <tr>
+          <th>Event Subtypes:</th>
+          <td>${event.eventSubtypes ? event.eventSubtypes : NA}</td>
+        </tr>
 
-          <tr>
-            <th>Areas:</th>
-            <td>${event.areas}</td>
-          </tr>
-          <tr>
-            <th>Roads:</th>
-            <td>${event.roads ? event.roads : NA}</td>
-          </tr>
-          <tr>
-            <th>Geography:</th>
-            <td>${event.geography ? event.geography : NA}</td>
-          </tr>
+        <tr>
+          <th>Areas:</th>
+          <td>${event.areas}</td>
+        </tr>
+        <tr>
+          <th>Roads:</th>
+          <td>${event.roads ? event.roads : NA}</td>
+        </tr>
+        <tr>
+          <th>Geography:</th>
+          <td>${event.geography ? event.geography : NA}</td>
+        </tr>
 
-          <tr>
-            <th>Updated:</th>
-            <td>${event.updated}</td>
-          </tr>
-          <tr>
-            <th>Created:</th>
-            <td>${event.created}</td>
-          </tr>
-        </tbody>
-      </table>
-      `);
+        <tr>
+          <th>Updated:</th>
+          <td>${event.updated}</td>
+        </tr>
+        <tr>
+          <th>Created:</th>
+          <td>${event.created}</td>
+        </tr>
+      </tbody>
+    </table>
+    `);
 };
 
 var eventsTable = undefined;
 
+const loadAreaOptions = () => {
+  $("#areaFilter .placeholder").text("Loading options...");
+  $.ajax({
+    url: `${API_URI}${AREA_PATH}`,
+    success: (data) => {
+      let areas = data["areas"].map((area)=>{
+        $("#areaFilter").append(
+          $('<option>', {value: area["id"], text: area["name"]})
+        );
+      });
+      $("#areaFilter .placeholder").text("Unselected");
+      $('#areaFilter').removeAttr('disabled');
+
+      $("#areaFilter").on("change", ()=>{
+        eventsTable && eventsTable.ajax.reload();
+      });
+    },
+    error: (jqXHR, textStatus, errorThrown ) => {
+      $("#areaFilter .placeholder").text("Failed to load options");
+    }
+  });
+};
+
 $(document).ready(function () {
+  var currentUserID = $('body').data("user-id");
 
   eventsTable = $('#eventsTable').DataTable({
     columns: [
@@ -225,42 +249,66 @@ $(document).ready(function () {
             recordsFiltered = offset + events.length;
           }
 
-          let json = events.map((event)=>{
-            return {
-              // basic information for the main table
-              DT_RowId: event["id"],
-              id: event["id"] != undefined ? event["id"].split("/")[1] : NA,
-              headline: event["headline"],
-              eventType: event["event_type"],
-              areas: event["areas"].map((area)=>{
-                return area["name"];
-              }).join(", "),
-              severity: event["severity"],
-              startDate: event["schedule"] != undefined && event["schedule"]["intervals"] != undefined ? event["schedule"]["intervals"].map((str)=>{
-                return formatTime(str);
-              }).join("<br>") : NA,
-              actions: '<button type="button" class="btn btn-primary btn-xs">Save</button>',
-              // additional detail information for the nested table
-              url: event["url"],
-              jurisdictionUrl: event["jurisdiction_url"],
-              description: event["description"],
-              status: event["status"],
-              ivrMessage: event["ivr_message"],
-              eventSubtypes: event["event_subtypes"] != undefined ? event["event_subtypes"].join(", ") : NA,
-              geography: JSON.stringify(event["geography"]),
-              roads: event["roads"].map((road)=>{
-                return `${road["name"]} (from ${road["from"]} to ${road["to"]}) ${road["state"]} (${road["direction"]} direction), +delay: ${road["+delay"] ? road["+delay"] : NA}`;
-              }).join(", "),
-              updated: moment.utc(event["updated"]).local().format('on YYYY-MM-DD at HH:mm:ss'),
-              created: moment.utc(event["created"]).local().format('on YYYY-MM-DD at HH:mm:ss'),
-            };
+          // get
+          $.ajax({
+            url: "/bookmarks/check",
+            method: "post",
+            data: JSON.stringify({event_ids: events.map((event)=>{return event["id"];})}),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': $('meta[name=csrf-token]').attr('content'),
+            },
+            success: (bookmarks) => {
+              DEBUG && console.log("checked ids", bookmarks);
+              let json = events.map((event)=>{
+                let button = '<a href="/sign_in" class="btn btn-outline-primary btn-xs">Log in to save</a>';
+                if(currentUserID){
+                  if(bookmarks[event["id"]]){
+                    button = `<a data-id="btn_${event["id"]}" href="/bookmarks/${bookmarks[event["id"]]}" data-method="delete" data-remote="true" class="btn btn-danger btn-xs">Remove</a>`;
+                  }
+                  else{
+                    button = `<a data-id="btn_${event["id"]}" href="/bookmarks?event_id=${encodeURIComponent(event["id"])}" data-method="post" data-remote="true" class="btn btn-success btn-xs">Save</a>`
+                  }
+                }
+                return {
+                  // basic information for the main table
+                  DT_RowId: event["id"],
+                  id: event["id"] != undefined ? event["id"].split("/")[1] : NA,
+                  headline: event["headline"],
+                  eventType: event["event_type"],
+                  areas: event["areas"].map((area)=>{
+                    return area["name"];
+                  }).join(", "),
+                  severity: event["severity"],
+                  startDate: event["schedule"] != undefined && event["schedule"]["intervals"] != undefined ? event["schedule"]["intervals"].map((str)=>{
+                    return formatTime(str);
+                  }).join("<br>") : NA,
+                  actions: button,
+                  // additional detail information for the nested table
+                  url: event["url"],
+                  jurisdictionUrl: event["jurisdiction_url"],
+                  description: event["description"],
+                  status: event["status"],
+                  ivrMessage: event["ivr_message"],
+                  eventSubtypes: event["event_subtypes"] != undefined ? event["event_subtypes"].join(", ") : NA,
+                  geography: JSON.stringify(event["geography"]),
+                  roads: event["roads"].map((road)=>{
+                    return `${road["name"]} (from ${road["from"]} to ${road["to"]}) ${road["state"]} (${road["direction"]} direction), +delay: ${road["+delay"] ? road["+delay"] : NA}`;
+                  }).join(", "),
+                  updated: moment.utc(event["updated"]).local().format('on YYYY-MM-DD at HH:mm:ss'),
+                  created: moment.utc(event["created"]).local().format('on YYYY-MM-DD at HH:mm:ss'),
+                };
+              });
+              callback({
+                draw: draw || 1,
+                recordsTotal: undefined,
+                recordsFiltered: recordsFiltered,
+                data: json,
+              });
+            }
           });
-          callback({
-            draw: draw || 1,
-            recordsTotal: undefined,
-            recordsFiltered: recordsFiltered,
-            data: json,
-          });
+
+
         },
         error: (jqXHR, textStatus, errorThrown ) => {
           DEBUG && console.log("ajax call failed...", textStatus);
@@ -320,27 +368,71 @@ $(document).ready(function () {
   $("#startDateFilter").on("change", ()=>{
     eventsTable && eventsTable.ajax.reload();
   });
-});
 
-const loadAreaOptions = () => {
-  $("#areaFilter .placeholder").text("Loading options...");
-  $.ajax({
-    url: `${API_URI}${AREA_PATH}`,
-    success: (data) => {
-      let areas = data["areas"].map((area)=>{
-        $("#areaFilter").append(
-          $('<option>', {value: area["id"], text: area["name"]})
-        );
-      });
-      $("#areaFilter .placeholder").text("Unselected");
-      $('#areaFilter').removeAttr('disabled');
 
-      $("#areaFilter").on("change", ()=>{
-        eventsTable && eventsTable.ajax.reload();
-      });
-    },
-    error: (jqXHR, textStatus, errorThrown ) => {
-      $("#areaFilter .placeholder").text("Failed to load options");
+  // initialize bookmarks table
+
+  var bookmarkedEventsTable = $('#bookmarkedEventsTable').DataTable({
+    columns: [
+      {
+        className: 'dt-control',
+        orderable: false,
+        data: null,
+        defaultContent: '',
+      },
+      { data: 'id',
+        defaultContent: "<em class='text-muted'>blank</em>",
+        className: "text-center",
+        orderable: true
+      },
+      { data: 'headline',
+        defaultContent: "<em class='text-muted'>blank</em>",
+        className: "text-left",
+        orderable: true
+      },
+      { data: 'eventType',
+        defaultContent: "<em class='text-muted'>blank</em>",
+        className: "text-right",
+        orderable: true
+      },
+      { data: 'areas',
+        defaultContent: "<em class='text-muted'>blank</em>",
+        className: "text-right",
+        orderable: false
+      },
+      { data: 'severity',
+        defaultContent: "<em class='text-muted'>blank</em>",
+        className: "text-right",
+        orderable: true
+      },
+      { data: 'startDate',
+        defaultContent: "<em class='text-muted'>blank</em>",
+        className: "text-right",
+        orderable: false
+      },
+      {
+        data: 'actions',
+        className: "text-center",
+        orderable: false
+      }
+    ],
+
+    ajax: "/bookmarks"
+  });
+
+  // Add event listener for opening and closing an event row
+  $('#bookmarkedEventsTable tbody').on('click', 'td.dt-control', (event) => {
+    let tr = $(event.target).closest('tr');
+    let row = bookmarkedEventsTable.row(tr);
+
+    if (row.child.isShown()) {
+      // this event is already open - close
+      row.child.hide();
+      tr.removeClass('shown');
+    } else {
+      console.log(row.data());
+      row.child(showEventDetails(row.data())).show();
+      tr.addClass('shown');
     }
   });
-};
+});

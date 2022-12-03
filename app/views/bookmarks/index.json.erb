@@ -1,0 +1,27 @@
+{
+  "data": [
+  <% @bookmarks.each_with_index do |bookmark, index| %>
+    <% event = JSON.parse bookmark.data %>
+    {
+      "DT_RowId": "<%= event["id"] %>",
+      "id": "<%= !event["id"].blank? ? event["id"].split("/").last : BookmarksController::NA %>",
+      "headline": "<%= event["headline"] %>",
+      "eventType": "<%= event["event_type"] %>",
+      "areas": "<%= event["areas"].map{|area| area["name"]}.join(", ") %>",
+      "severity": "<%= event["severity"] %>",
+      "startDate": "<%= event["schedule"].present? && event["schedule"]["intervals"].present? ? event["schedule"]["intervals"].map{|str| str}.join("<br/>") : BookmarksController::NA %>",
+      "actions": "<a href='/bookmarks/<%= bookmark.id %>' data-method='delete' data-remote='true' class='btn btn-danger btn-xs'>Delete</a>",
+      "url": "<%= event["url"] %>",
+      "jurisdictionUrl": "<%= event["jurisdiction_url"] %>",
+      "description": "<%= event["description"] %>",
+      "status": "<%= event["status"] %>",
+      "ivrMessage": "<%= event["ivr_message"] %>",
+      "eventSubtypes": "<%= event["event_subtypes"].present? ? event["event_subtypes"].join(", ") : BookmarksController::NA %>",
+      "geography": "<%= event["geography"].to_s %>",
+      "roads": "<%= event["roads"].map{|road| "#{road["name"]} (from #{road["from"]} to #{road["to"]}) #{road["state"]} (#{road["direction"]} direction), +delay: #{road["+delay"] ? road["+delay"] : BookmarksController::NA}"}.join(", ") %>",
+      "updated": "<%= event["updated"] %>",
+      "created": "<%= event["created"] %>"
+    }<% if index < @bookmarks.length - 1 %>,<% end %>
+  <% end %>
+  ]
+}

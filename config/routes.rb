@@ -9,6 +9,10 @@ Rails.application.routes.draw do
     post "create_session", on: :collection
   end
 
+  resources :bookmarks, only: [:index, :create, :destroy] do
+    post "check", on: :collection # check if events are already bookmarked
+  end
+
   # one page route
   root "main#home"
 end

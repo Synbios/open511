@@ -10,7 +10,7 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
   </head>
 
-  <body>
+  <body data-user-id="<%= current_user.present? ? current_user.id : "" %>">
     <div class="container">
       <%= yield %>
     </div>
