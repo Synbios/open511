@@ -44,7 +44,7 @@ class LocalEventsController < ActionController::API
 
       render json: {status: :ok, events: data, pagination: pagination}
     rescue Exception => e
-      #logger.debug e.backtrace.join("\n")
+      logger.debug e.backtrace.join("\n")
       if user.present?
         user.add_search_usage_record request.remote_ip, Usage::FAILED_STATUS
       end
@@ -102,7 +102,10 @@ class LocalEventsController < ActionController::API
 
       render json: {status: :ok, local_id: bookmark.id, event_id: bookmark.event_id}, status: :created
     rescue Exception => e
-      user.add_create_usage_record request.remote_ip, Usage::FAILED_STATUS
+      logger.debug e.backtrace.join("\n")
+      if user.present?
+        user.add_create_usage_record request.remote_ip, Usage::FAILED_STATUS
+      end
 
       render json: {status: :error, message: e.message}
     end

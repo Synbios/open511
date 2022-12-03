@@ -1,6 +1,7 @@
 require 'uri'
 require 'net/http'
 
+# deprecated: this code is not used. I misundertood the API storage end.
 class EventsController < ActionController::API
 
   QUERY_SIZE = 100
