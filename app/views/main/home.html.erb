@@ -130,6 +130,8 @@
   <h5>Table 3: API usage table</h5>
   <p>This table shows the usage information on the two APIs in the question. Only successful API calls are shown here. The numbers are updated automatically every 5 seconds. Please refer to the Read me part of this page for how to make API requests.</p>
   <br/>
+
+  <% if current_user.present? %>
   <table id="apiUsageTable" class="table table-bordered w-100">
     <thead>
       <tr>
@@ -146,4 +148,7 @@
       </tr>
     </tbody>
   </table>
+  <% else %>
+  <p class="text-info">You are not signed in. Please sign in to see this table. If you already signed in on another tab, please refresh this page.</p>
+  <% end %>
 </div>

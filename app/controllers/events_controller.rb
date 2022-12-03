@@ -5,12 +5,6 @@ class EventsController < ActionController::API
 
   QUERY_SIZE = 100
   QUERY_URI = "https://api.open511.gov.bc.ca/events"
-  SEVERITY_ORDER = {
-    MAJOR: 1,
-    MODERATE: 2,
-    MINOR: 3,
-    UNKNOWN: 4
-  }
 
   # return highest severity events by area id
   def index
@@ -32,23 +26,22 @@ class EventsController < ActionController::API
       events = query_remote_events(0, QUERY_SIZE, area_id)
 
       # step 2: sort events by severity
-      events.sort! { |a,b| SEVERITY_ORDER[a["severity"].to_sym] <=> SEVERITY_ORDER[b["severity"].to_sym] }.map{|x| x["severity"]}
+      events.sort! { |a,b| Bookmark::SEVERITY_ORDER[a["severity"].to_sym] <=> Bookmark::SEVERITY_ORDER[b["severity"].to_sym] }.map{|x| x["severity"]}
 
       # step 3: return the request amount of events
       results = events[offset, offset+limit]
       results = results.nil? ? [] : results
-      Usage.record_request Usage::SEARCH_REQUEST, request.remote_ip, Usage::SUCCESS_STATUS
 
       render json: {status: :ok, events: results, has_more: offset+limit < events.length}
     rescue Exception => e
-      #logger.debug e.backtrace.join("\n")
-      Usage.record_request Usage::SEARCH_REQUEST, request.remote_ip, Usage::FAILED_STATUS
 
       render json: {status: :error, message: e.message}
     end
   end
 
   # this allows users create a local event (because the official API docs has no create event API)
+  # usage:
+  # curl -d '{"event":{"url": "/events/drivebc.ca/153307", "jurisdiction": "/jurisdiction", "headline":"abc", "status": "active", "event_type": "INCIDENT", "seve "geography":"stringfied hash","schedule":"stringfied hash"}}' -H "Content-Type: application/json" -X POST http://0.0.0.0:3000/events
   def create
     begin
       if params[:event].blank?
@@ -76,10 +69,9 @@ class EventsController < ActionController::API
         raise Exception.new("Failed to save event.")
       end
 
-      Usage.record_request Usage::CREATE_REQUEST, request.remote_ip, Usage::SUCCESS_STATUS
       render json: {status: :ok}, status: :created
     rescue Exception => e
-      Usage.record_request Usage::CREATE_REQUEST, request.remote_ip, Usage::FAILED_STATUS
+
       render json: {status: :error, message: e.message}
     end
 

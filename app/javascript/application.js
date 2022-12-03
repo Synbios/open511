@@ -50,9 +50,12 @@ $(document).ready(function () {
 
   configureEventsTable();
 
-  configureBookmarkedEventsTable();
+  if(currentUserID){
+    configureBookmarkedEventsTable();
 
-  configureUsageTable();
+    configureUsageTable();
+  }
+
 });
 
 /// instance functions
@@ -454,6 +457,10 @@ const configureBookmarkedEventsTable = () => {
       tr.addClass('shown');
     }
   });
+
+  window.reloadBookmarkedEventsTable = () => {
+    bookmarkedEventsTable.ajax.reload();
+  };
 };
 
 // setup the API usage table (the third table)

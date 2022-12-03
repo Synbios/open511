@@ -1,1 +1,2 @@
 $('a[data-id="btn_<%= @bookmark.event_id %>"]').replaceWith(`<a data-id="btn_<%= @bookmark.event_id %>" href="/bookmarks/<%= @bookmark.id %>" data-method="delete" data-remote="true" class="btn btn-danger btn-xs">Remove</a>`);
+reloadBookmarkedEventsTable();

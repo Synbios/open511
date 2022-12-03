@@ -10,13 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_03_042426) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_03_170416) do
+  create_table "areas", force: :cascade do |t|
+    t.string "name"
+    t.string "api_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_id"], name: "index_areas_on_api_id", unique: true
+  end
+
+  create_table "areas_bookmarks", id: false, force: :cascade do |t|
+    t.integer "area_id", null: false
+    t.integer "bookmark_id", null: false
+    t.index ["area_id", "bookmark_id"], name: "index_areas_bookmarks_on_area_id_and_bookmark_id"
+    t.index ["bookmark_id", "area_id"], name: "index_areas_bookmarks_on_bookmark_id_and_area_id"
+  end
+
   create_table "bookmarks", force: :cascade do |t|
     t.integer "user_id"
     t.string "event_id"
     t.text "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "severity_level"
     t.index ["user_id", "event_id"], name: "index_bookmarks_on_user_id_and_event_id", unique: true
     t.index ["user_id"], name: "index_bookmarks_on_user_id"
   end
@@ -45,8 +61,10 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_03_042426) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
     t.index ["request_type"], name: "index_usages_on_request_type"
     t.index ["status"], name: "index_usages_on_status"
+    t.index ["user_id"], name: "index_usages_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
