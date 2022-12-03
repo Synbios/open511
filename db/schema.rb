@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2022_12_02_203327) do
+ActiveRecord::Schema[7.0].define(version: 2022_12_03_042426) do
   create_table "bookmarks", force: :cascade do |t|
     t.integer "user_id"
     t.string "event_id"
@@ -19,6 +19,34 @@ ActiveRecord::Schema[7.0].define(version: 2022_12_02_203327) do
     t.datetime "updated_at", null: false
     t.index ["user_id", "event_id"], name: "index_bookmarks_on_user_id_and_event_id", unique: true
     t.index ["user_id"], name: "index_bookmarks_on_user_id"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "url"
+    t.string "jurisdiction_url"
+    t.string "headline"
+    t.string "status"
+    t.string "description"
+    t.string "ivr_message"
+    t.string "schedule"
+    t.string "event_type"
+    t.string "event_subtypes"
+    t.string "severity"
+    t.string "geography"
+    t.string "roads"
+    t.string "areas"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "usages", force: :cascade do |t|
+    t.string "request_type"
+    t.string "ip"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["request_type"], name: "index_usages_on_request_type"
+    t.index ["status"], name: "index_usages_on_status"
   end
 
   create_table "users", force: :cascade do |t|

@@ -20,22 +20,43 @@ window.$.DataTable = dt;
 // load moment
 import moment from "moment";
 
+// load rails ujs
 import Rails from '@rails/ujs';
-
 Rails.start();
 
-// constants
+// configure constants
 const DEBUG = window.location.hostname === '0.0.0.0';
 const API_URI = "https://api.open511.gov.bc.ca";
 const EVENT_SEARCH_PATH = "/events";
 const AREA_PATH = "/areas";
+const UPDATE_USAGE_DATA_TIME = 5000; // update usage data every 5 secs
 
 const NA = '<i class="text-muted">N/A</i>';
 
 
-// begin home page configuration
+/*
+ * Code begins here:
+ * Please note normally I will split a js file like this to a few smaller files.
+ * But for easy-to-read reason all functions are defined in one js file.
+ */
 
+/// page variables
+var currentUserID = $('body').data("user-id"); // the current user's id, null if user not logged in
+var eventsTable = undefined; // the main events table (the first table)
+var bookmarkedEventsTable = undefined; // the saved events table (the second table)
 
+/// main JS entry of the one-page web ///
+$(document).ready(function () {
+
+  configureEventsTable();
+
+  configureBookmarkedEventsTable();
+
+  configureUsageTable();
+});
+
+/// instance functions
+// convert a UTC time to local time in a human readable format
 const formatTime = (str) => {
   if(str != undefined){
     let times = str.split("/");
@@ -53,113 +74,8 @@ const formatTime = (str) => {
   }
 };
 
-const showEventDetails = (event) => {
-  return (`
-    <table class="table table-borderless table-sm table-nested">
-      <tbody>
-        <tr>
-          <th>Official ID:</th>
-          <td>${event.id}</td>
-        </tr>
-        <tr>
-          <th>Data URL:</th>
-          <td>
-            <a href="${API_URI}${event.url}" target="_blank">${API_URI}${event.url} <i class="bi bi-hand-index-thumb"></i></a>
-          </td>
-        </tr>
-        <tr>
-          <th>Jurisdiction URL:</th>
-          <td>
-            <a href="${API_URI}${event.jurisdictionUrl}" target="_blank">${API_URI}${event.jurisdictionUrl} <i class="bi bi-hand-index-thumb"></i></a>
-          </td>
-        </tr>
-        <tr>
-          <th>Headline:</th>
-          <td>${event.headline ? event.headline : NA}</td>
-        </tr>
-        <tr>
-          <th>Status:</th>
-          <td>${event.status}</td>
-        </tr>
-        <tr>
-          <th>Severity:</th>
-          <td>${event.severity}</td>
-        </tr>
-        <tr>
-          <th>Description:</th>
-          <td>${event.description ? event.description : NA}</td>
-        </tr>
-        <tr>
-          <th>Plus IVR Message:</th>
-          <td>${event.ivr_message ? event.ivr_message : NA}</td>
-        </tr>
-        <tr>
-          <th>Schedules:</th>
-          <td>${event.startDate}</td>
-        </tr>
-        <tr>
-          <th>Event Type:</th>
-          <td>${event.eventType}</td>
-        </tr>
-        <tr>
-          <th>Event Subtypes:</th>
-          <td>${event.eventSubtypes ? event.eventSubtypes : NA}</td>
-        </tr>
-
-        <tr>
-          <th>Areas:</th>
-          <td>${event.areas}</td>
-        </tr>
-        <tr>
-          <th>Roads:</th>
-          <td>${event.roads ? event.roads : NA}</td>
-        </tr>
-        <tr>
-          <th>Geography:</th>
-          <td>${event.geography ? event.geography : NA}</td>
-        </tr>
-
-        <tr>
-          <th>Updated:</th>
-          <td>${event.updated}</td>
-        </tr>
-        <tr>
-          <th>Created:</th>
-          <td>${event.created}</td>
-        </tr>
-      </tbody>
-    </table>
-    `);
-};
-
-var eventsTable = undefined;
-
-const loadAreaOptions = () => {
-  $("#areaFilter .placeholder").text("Loading options...");
-  $.ajax({
-    url: `${API_URI}${AREA_PATH}`,
-    success: (data) => {
-      let areas = data["areas"].map((area)=>{
-        $("#areaFilter").append(
-          $('<option>', {value: area["id"], text: area["name"]})
-        );
-      });
-      $("#areaFilter .placeholder").text("Unselected");
-      $('#areaFilter').removeAttr('disabled');
-
-      $("#areaFilter").on("change", ()=>{
-        eventsTable && eventsTable.ajax.reload();
-      });
-    },
-    error: (jqXHR, textStatus, errorThrown ) => {
-      $("#areaFilter .placeholder").text("Failed to load options");
-    }
-  });
-};
-
-$(document).ready(function () {
-  var currentUserID = $('body').data("user-id");
-
+// configure the main event table (the first table)
+const configureEventsTable = () => {
   eventsTable = $('#eventsTable').DataTable({
     columns: [
       {
@@ -352,7 +268,6 @@ $(document).ready(function () {
     }
   });
 
-
   // configure filter options
   // load and configure areas
   loadAreaOptions();
@@ -368,11 +283,115 @@ $(document).ready(function () {
   $("#startDateFilter").on("change", ()=>{
     eventsTable && eventsTable.ajax.reload();
   });
+};
 
+// display the nested event table
+const showEventDetails = (event) => {
+  return (`
+    <table class="table table-borderless table-sm table-nested">
+      <tbody>
+        <tr>
+          <th>Official ID:</th>
+          <td>${event.id}</td>
+        </tr>
+        <tr>
+          <th>Data URL:</th>
+          <td>
+            <a href="${API_URI}${event.url}" target="_blank">${API_URI}${event.url} <i class="bi bi-hand-index-thumb"></i></a>
+          </td>
+        </tr>
+        <tr>
+          <th>Jurisdiction URL:</th>
+          <td>
+            <a href="${API_URI}${event.jurisdictionUrl}" target="_blank">${API_URI}${event.jurisdictionUrl} <i class="bi bi-hand-index-thumb"></i></a>
+          </td>
+        </tr>
+        <tr>
+          <th>Headline:</th>
+          <td>${event.headline ? event.headline : NA}</td>
+        </tr>
+        <tr>
+          <th>Status:</th>
+          <td>${event.status}</td>
+        </tr>
+        <tr>
+          <th>Severity:</th>
+          <td>${event.severity}</td>
+        </tr>
+        <tr>
+          <th>Description:</th>
+          <td>${event.description ? event.description : NA}</td>
+        </tr>
+        <tr>
+          <th>Plus IVR Message:</th>
+          <td>${event.ivr_message ? event.ivr_message : NA}</td>
+        </tr>
+        <tr>
+          <th>Schedules:</th>
+          <td>${event.startDate}</td>
+        </tr>
+        <tr>
+          <th>Event Type:</th>
+          <td>${event.eventType}</td>
+        </tr>
+        <tr>
+          <th>Event Subtypes:</th>
+          <td>${event.eventSubtypes ? event.eventSubtypes : NA}</td>
+        </tr>
 
-  // initialize bookmarks table
+        <tr>
+          <th>Areas:</th>
+          <td>${event.areas}</td>
+        </tr>
+        <tr>
+          <th>Roads:</th>
+          <td>${event.roads ? event.roads : NA}</td>
+        </tr>
+        <tr>
+          <th>Geography:</th>
+          <td>${event.geography ? event.geography : NA}</td>
+        </tr>
 
-  var bookmarkedEventsTable = $('#bookmarkedEventsTable').DataTable({
+        <tr>
+          <th>Updated:</th>
+          <td>${event.updated}</td>
+        </tr>
+        <tr>
+          <th>Created:</th>
+          <td>${event.created}</td>
+        </tr>
+      </tbody>
+    </table>
+    `);
+};
+
+// load area names and ids from remote API (for area filter)
+const loadAreaOptions = () => {
+  $("#areaFilter .placeholder").text("Loading options...");
+  $.ajax({
+    url: `${API_URI}${AREA_PATH}`,
+    success: (data) => {
+      let areas = data["areas"].map((area)=>{
+        $("#areaFilter").append(
+          $('<option>', {value: area["id"], text: area["name"]})
+        );
+      });
+      $("#areaFilter .placeholder").text("Unselected");
+      $('#areaFilter').removeAttr('disabled');
+
+      $("#areaFilter").on("change", ()=>{
+        eventsTable && eventsTable.ajax.reload();
+      });
+    },
+    error: (jqXHR, textStatus, errorThrown ) => {
+      $("#areaFilter .placeholder").text("Failed to load options");
+    }
+  });
+};
+
+// configure the saved event table (the second table)
+const configureBookmarkedEventsTable = () => {
+  bookmarkedEventsTable = $('#bookmarkedEventsTable').DataTable({
     columns: [
       {
         className: 'dt-control',
@@ -435,4 +454,23 @@ $(document).ready(function () {
       tr.addClass('shown');
     }
   });
-});
+};
+
+// setup the API usage table (the third table)
+const configureUsageTable = () => {
+  updateUsageTable();
+  // update usage data continously
+  setInterval(updateUsageTable, UPDATE_USAGE_DATA_TIME);
+};
+
+// load API usage data (the thrid table)
+const updateUsageTable = () => {
+  $.ajax({
+    url: "/usages",
+    success: (data) =>{
+      $("#searchCalls").text(data.search_calls);
+      $("#createCalls").text(data.create_calls);
+      $("#usageLastUpdated").text(data.updated_at);
+    }
+  });
+};

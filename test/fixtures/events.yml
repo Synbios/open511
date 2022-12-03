@@ -1,0 +1,31 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  url: MyString
+  jurisdiction_url: MyString
+  headline: MyString
+  status: MyString
+  description: MyString
+  ivr_message: MyString
+  schedule: MyString
+  event_type: MyString
+  event_subtypes: MyString
+  severity: MyString
+  geography: MyString
+  roads: MyString
+  areas: MyString
+
+two:
+  url: MyString
+  jurisdiction_url: MyString
+  headline: MyString
+  status: MyString
+  description: MyString
+  ivr_message: MyString
+  schedule: MyString
+  event_type: MyString
+  event_subtypes: MyString
+  severity: MyString
+  geography: MyString
+  roads: MyString
+  areas: MyString

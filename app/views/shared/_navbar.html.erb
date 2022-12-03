@@ -1,26 +1,19 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
   <div class="container-fluid">
-    <%= link_to "Assessment Question 1", root_path, class: "navbar-brand" %>
+    <%= link_to "REQ92534 Assessment Question 1", root_path, class: "navbar-brand" %>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarScroll">
-      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+      <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;"></ul>
 
-        <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Link</a>
-        </li>
-      </ul>
       <div class="d-flex">
         <% if current_user.nil? %>
           <%= link_to "Sign In", sign_in_path, class: "btn btn-secondary btn-sm ms-2 me-1" %>
           <%= link_to "Sign Up", sign_up_path, class: "btn btn-success btn-sm ms-2 me-1" %>
         <% else %>
+          <button class="btn btn-sm btn-link" disabled><%= current_user.email %></button>
           <%= link_to "Sign Out", sign_out_path, method: :delete, class: "btn btn-danger btn-sm ms-2 me-1" %>
         <% end %>
       </div>

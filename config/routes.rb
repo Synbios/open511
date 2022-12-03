@@ -13,6 +13,9 @@ Rails.application.routes.draw do
     post "check", on: :collection # check if events are already bookmarked
   end
 
+  resources :events, only: [:create, :index]
+  resources :usages, only: [:index]
+
   # one page route
   root "main#home"
 end
