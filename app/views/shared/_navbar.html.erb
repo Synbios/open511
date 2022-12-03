@@ -9,7 +9,7 @@
       <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;"></ul>
 
       <div class="d-flex">
-        <% if current_user.nil? %>
+        <% if !user_signed_in? %>
           <%= link_to "Sign In", sign_in_path, class: "btn btn-secondary btn-sm ms-2 me-1" %>
           <%= link_to "Sign Up", sign_up_path, class: "btn btn-success btn-sm ms-2 me-1" %>
         <% else %>

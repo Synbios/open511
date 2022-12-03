@@ -10,6 +10,7 @@ require 'capistrano/bundler'
 require 'capistrano/puma'
 require 'capistrano/rails/collection'
 install_plugin Capistrano::Puma
+install_plugin Capistrano::Puma::Systemd
 
 # Load the SCM plugin appropriate to your project:
 #
