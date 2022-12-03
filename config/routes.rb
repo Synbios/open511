@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  devise_for :users
+
   # one page route
   root "main#home"
 
@@ -8,9 +8,12 @@ Rails.application.routes.draw do
   get "sign_in", to: "users#sign_in_view"
   delete "sign_out", to: "users#delete_session"
 
-  resources :users, only: [:create] do
+  resources :users, only: [] do
     post "create_session", on: :collection
+    post "create_new", on: :collection
   end
+
+  devise_for :users
 
   # routes of saved events
   resources :bookmarks, only: [:index, :create, :destroy] do

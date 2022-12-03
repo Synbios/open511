@@ -9,6 +9,8 @@ class User < ApplicationRecord
   has_many :bookmarks, dependent: :destroy
   has_many :usages, dependent: :destroy
 
+  validates :email, uniqueness: true
+
   def add_search_usage_record(ip, status)
     self.usages.create request_type: Usage::SEARCH_REQUEST, ip: ip, status: status
   end
